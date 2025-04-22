@@ -1,16 +1,19 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Tv, Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import Button from '../components/Button';
 
 const Login: React.FC = () => {
+  const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle login logic here
+    // TODO: Replace with actual auth logic
+    localStorage.setItem('isAuthenticated', 'true');
+    navigate('/dashboard');
   };
 
   return (
