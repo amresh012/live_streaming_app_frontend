@@ -14,7 +14,8 @@ import {
   Play,
   MoreVertical,
   LayoutGrid,
-  LayoutList
+  LayoutList,
+  DollarSign
 } from 'lucide-react';
 import Button from '../components/Button';
 import SettingsSection from './setting';
@@ -24,14 +25,16 @@ import LiveStream from './Livestream';
 import NewStreamModal from '../components/NewStreamModal';
 import NotificationsDropdown from '../components/NotifictionDropdown';
 import UserProfileDropdown from '../components/UserProfileDropdown';
+import MultiplatformConnect from '../components/MutiPlatform';
 
 // Analytics Stats
 const AnalyticsSection = () => (
-  <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+  <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
     {[
       { label: 'Total Views', value: '24.5k', change: '+12%' },
       { label: 'Followers', value: '1,234', change: '+3%' },
       { label: 'Stream Time', value: '45.2h', change: '+8%' },
+      { label: 'Stream Revenu', value: '45k', change: '+4%' },
     ].map((stat) => (
       <div key={stat.label} className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm">
         <p className="text-sm text-gray-600 dark:text-gray-400">{stat.label}</p>
@@ -202,6 +205,10 @@ const UpcomingStreamsSection = () => {
   ];
 
   return (
+    <>
+    <div>
+      <MultiplatformConnect/>
+      </div>
     <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
       <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
         Upcoming Streams
@@ -211,17 +218,19 @@ const UpcomingStreamsSection = () => {
           <div
             key={stream.id}
             className="border-l-4 border-purple-500 pl-4 py-2"
-          >
+            >
             <h3 className="font-medium text-gray-900 dark:text-white">
               {stream.title}
             </h3>
-            <p className="text-sm text-gray-600 dark:text-gray-400">
+            <p className="text-sm mb-2 text-gray-600 dark:text-gray-400">
               {stream.date} at {stream.time}
             </p>
+            <Button variant='outline'>Reschedule</Button>
           </div>
         ))}
       </div>
     </div>
+        </>
   );
 };
 
@@ -265,6 +274,7 @@ const Sidebar = () => {
   const navItems = [
     { icon: <BarChart className="w-5 h-5" />, label: 'Dashboard', path: '/dashboard' },
     { icon: <Video className="w-5 h-5" />, label: 'My Streams', path: '/dashboard/streams' },
+    { icon: <DollarSign className="w-5 h-5" />, label: 'Monetization', path: '/dashboard/monetize' },
     { icon: <Users className="w-5 h-5" />, label: 'Community', path: '/dashboard/community' },
     { icon: <MessageSquare className="w-5 h-5" />, label: 'Messages', path: '/dashboard/messages' },
     { icon: <Settings className="w-5 h-5" />, label: 'Settings', path: '/dashboard/settings' },
@@ -316,7 +326,6 @@ const Header = () => {
           />
         </div>
       </div>
-      
       <div className="flex items-center space-x-4">
         <div className="relative">
           <button 

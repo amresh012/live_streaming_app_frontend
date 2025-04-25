@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { X, Video, Calendar, Clock, Tag } from 'lucide-react';
 import Button from './Button';
 
@@ -16,13 +16,40 @@ const NewStreamModal: React.FC<NewStreamModalProps> = ({ isOpen, onClose }) => {
     time: '',
     isPrivate: false
   });
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     // Handle stream creation logic here
     console.log('Stream data:', streamData);
     onClose();
   };
+  // let mediaStream: MediaStream | null = null;
+
+  // const videoEl = document.getElementById("video") as HTMLVideoElement;
+  // const handleMedia = async (e: React.FormEvent) => {
+  //   e.preventDefault();
+  
+  //   mediaStream = await navigator.mediaDevices.getUserMedia({
+  //     audio: true,
+  //     video: true,
+  //   });
+  
+  //   if (videoEl) {
+  //     videoEl.srcObject = mediaStream;
+  //     videoEl.play();
+  //   }
+  // };
+
+  // const stopMedia = () => {
+  //   if (mediaStream) {
+  //     mediaStream.getTracks().forEach(track => track.stop());
+  //     mediaStream = null;
+  //   }
+  
+  //   const videoEl = document.getElementById("video") as HTMLVideoElement;
+  //   if (videoEl) {
+  //     videoEl.srcObject = null;
+  //   }
+  // };
 
   if (!isOpen) return null;
 
@@ -47,6 +74,7 @@ const NewStreamModal: React.FC<NewStreamModalProps> = ({ isOpen, onClose }) => {
               <X className="w-6 h-6" />
             </button>
           </div>
+          {/* <video id='video' src={videoEl} muted></video> */}
 
           {/* Content */}
           <form onSubmit={handleSubmit} className="px-6 py-4">
@@ -161,7 +189,7 @@ const NewStreamModal: React.FC<NewStreamModalProps> = ({ isOpen, onClose }) => {
           {/* Footer */}
           <div className="px-6 py-4 bg-gray-50 dark:bg-gray-700/50 border-t border-gray-200 dark:border-gray-700">
             <div className="flex flex-row-reverse gap-3">
-              <Button type="submit" variant="primary" onClick={handleSubmit}>
+              <Button onClick={handleSubmit} type="submit" variant="primary" >
                 Start Stream
               </Button>
               <Button type="submit" variant="secondary" onClick={handleSubmit}>
