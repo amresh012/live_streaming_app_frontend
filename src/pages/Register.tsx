@@ -1,20 +1,53 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Tv, Mail, Lock, User, Eye, EyeOff } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Tv, Mail, Lock, User, Eye, EyeOff} from 'lucide-react';
 import Button from '../components/Button';
-
+import {base_url} from "../utils/base_url"
+import {toast, Toaster} from "react-hot-toast"
+import axios from "axios"
 const Register: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [formdata, setFormData] = useState({
+    username:"",
+    name:"",
+    email:"",
+    password:""
 
-  const handleSubmit = (e: React.FormEvent) => {
+  })
+ 
+  const navigate = useNavigate()
+
+  const handleChange = (e: React.FormEvent) => {
+    setFormData({
+      ...formdata,
+      [(e.target as HTMLInputElement).id]: (e.target as HTMLInputElement).value,
+    });
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     // Handle registration logic here
+    try {
+      const res = await axios.post(`${base_url}auth/register`, formdata);
+      // console.log(res)
+      localStorage.setItem("token", res.data.token);
+
+      if (res.data.success) {
+       await toast.success("registered successfully")
+        navigate("/dashboard")
+      } else {
+        throw new Error(res.data);
+      }
+    } catch (error: any) {
+      console.log(error);
+      toast.error(error?.response?.data?.message || "An unexpected error occurred");
+    }
   };
 
+
   return (
+   <>
+   <Toaster/>
     <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-gray-50 dark:bg-gray-900">
       <div className="max-w-md w-full space-y-8 bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-xl">
         <div>
@@ -40,6 +73,27 @@ const Register: React.FC = () => {
         
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="space-y-4">
+          <div>
+              <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                username
+              </label>
+              <div className="mt-1 relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <User className="h-5 w-5 text-gray-400" />
+                </div>
+                <input
+                  id="username"
+                  name="username"
+                  type="text"
+                  autoComplete="username"
+                  required
+                  value={formdata.username}
+                  onChange={handleChange}
+                  className="appearance-none block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-purple-500 focus:border-purple-500 dark:bg-gray-700 dark:text-white sm:text-sm"
+                  placeholder="Enter your username"
+                />
+              </div>
+            </div>
             <div>
               <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                 Full name
@@ -54,8 +108,8 @@ const Register: React.FC = () => {
                   type="text"
                   autoComplete="name"
                   required
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
+                  value={formdata.name}
+                  onChange={handleChange}
                   className="appearance-none block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-purple-500 focus:border-purple-500 dark:bg-gray-700 dark:text-white sm:text-sm"
                   placeholder="Enter your full name"
                 />
@@ -76,8 +130,8 @@ const Register: React.FC = () => {
                   type="email"
                   autoComplete="email"
                   required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  value={formdata.email}
+                  onChange={handleChange}
                   className="appearance-none block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-purple-500 focus:border-purple-500 dark:bg-gray-700 dark:text-white sm:text-sm"
                   placeholder="Enter your email"
                 />
@@ -98,8 +152,8 @@ const Register: React.FC = () => {
                   type={showPassword ? 'text' : 'password'}
                   autoComplete="new-password"
                   required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  value={formdata.password}
+                  onChange={handleChange}
                   className="appearance-none block w-full pl-10 pr-10 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-purple-500 focus:border-purple-500 dark:bg-gray-700 dark:text-white sm:text-sm"
                   placeholder="Create a password"
                 />
@@ -183,6 +237,7 @@ const Register: React.FC = () => {
         </div>
       </div>
     </div>
+   </>
   );
 };
 

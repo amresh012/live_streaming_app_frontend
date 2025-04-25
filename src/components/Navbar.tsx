@@ -13,6 +13,7 @@ const navItems: NavItem[] = [
   { name: 'Testimonials', href: '#testimonials' },
   { name: 'Pricing', href: '#pricing' },
   { name: 'Download', href: '#download' },
+  { name: 'Login', href: '/login' },
 ];
 
 const Navbar: React.FC = () => {

@@ -1,8 +1,12 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Button from '../components/Button';
 import { Play, Download } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const HeroSection: React.FC = () => {
+
+const token = localStorage.getItem("token")
+ 
   return (
     <section id="home" className="pt-24 md:pt-32 pb-16 md:pb-24 overflow-hidden">
       <div className="container mx-auto px-4 md:px-6">
@@ -25,13 +29,26 @@ const HeroSection: React.FC = () => {
             </div>
 
             <div className="flex flex-col sm:flex-row gap-4">
-              <Button 
+               { token ?
+               <Link to="/dashboard">
+                 <Button 
+                variant="primary" 
+                size="lg" 
+                icon={<Play className="w-5 h-5" />}
+              >
+                Start Streaming Now
+              </Button> 
+               </Link>: 
+               <Link to="/login">
+               <Button 
                 variant="primary" 
                 size="lg" 
                 icon={<Play className="w-5 h-5" />}
               >
                 Start Streaming Now
               </Button>
+               </Link>
+               }
               <Button 
                 variant="outline" 
                 size="lg"

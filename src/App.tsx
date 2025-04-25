@@ -12,6 +12,10 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import ProtectedRoute from './components/ProtectedRoutes';
+import SettingsSection from './pages/setting';
+import MessagesSection from './pages/Message';
+import CommunitySection from './pages/Community';
+import LiveStream from './pages/Livestream';
 
 // Add global animations
 const globalStyles = `
@@ -70,10 +74,11 @@ function App() {
     };
   }, []);
 
+
   return (
     <ThemeProvider>
       <Router>
-        <div className="min-h-screen bg-white dark:bg-gray-900 text-gray-900 dark:text-white transition-colors duration-300">
+        <div className="min-h-screen bg-white dark:bg-gray-900 overflow-clip text-gray-900 dark:text-white transition-colors duration-300">
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/login" element={<Login />} />
@@ -85,7 +90,11 @@ function App() {
                   <Dashboard />
                 </ProtectedRoute>
               } 
-            />
+              />
+              <Route path='/dashboard/settings' element={<ProtectedRoute><SettingsSection/></ProtectedRoute>}/>
+              <Route path='/dashboard/messages' element={<ProtectedRoute><MessagesSection/></ProtectedRoute>}/>
+              <Route path='/dashboard/community' element={<ProtectedRoute><CommunitySection/></ProtectedRoute>}/>
+              <Route path='/dashboard/stream/:id' element={<ProtectedRoute><LiveStream /></ProtectedRoute>}/>
           </Routes>
         </div>
       </Router>
