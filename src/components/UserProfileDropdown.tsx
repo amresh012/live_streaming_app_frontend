@@ -9,9 +9,11 @@ import {
   Moon,
   Sun,
   Shield,
-  Star
+  Star,
+  Video
 } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
+import {useSelector} from "react-redux"
 
 interface UserProfileDropdownProps {
   isOpen: boolean;
@@ -20,7 +22,7 @@ interface UserProfileDropdownProps {
 
 const UserProfileDropdown: React.FC<UserProfileDropdownProps> = ({ isOpen, onClose }) => {
   const { theme, toggleTheme } = useTheme();
-
+  const {user,token} = useSelector(state => state.auth)
   if (!isOpen) return null;
 
   return (
@@ -35,23 +37,23 @@ const UserProfileDropdown: React.FC<UserProfileDropdownProps> = ({ isOpen, onClo
       <div className="absolute right-0 mt-2 w-72 bg-white dark:bg-gray-800 rounded-xl shadow-lg z-50 border border-gray-200 dark:border-gray-700 overflow-hidden">
         {/* User Info */}
         <div className="p-4 border-b border-gray-200 dark:border-gray-700">
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-3 ">
             <img
               src="https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=100"
               alt="Profile"
-              className="w-12 h-12 rounded-full object-cover"
+              className="max-w-[3em] max-h-[3em] rounded-full object-cover"
             />
             <div>
               <h3 className="text-base font-semibold text-gray-900 dark:text-white">
-                Alex Johnson
+                {user?.name}
               </h3>
               <p className="text-sm text-gray-500 dark:text-gray-400">
-                @alexjohnson
+                {user?.email}
               </p>
             </div>
           </div>
           
-          <div className="mt-3 grid grid-cols-2 gap-2 text-center text-sm">
+          {user?.role === "streamer" && <div className="mt-3 grid grid-cols-2 gap-2 text-center text-sm">
             <div className="px-3 py-2 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
               <p className="font-semibold text-gray-900 dark:text-white">1.2K</p>
               <p className="text-gray-500 dark:text-gray-400">Followers</p>
@@ -60,7 +62,7 @@ const UserProfileDropdown: React.FC<UserProfileDropdownProps> = ({ isOpen, onClo
               <p className="font-semibold text-gray-900 dark:text-white">Pro</p>
               <p className="text-gray-500 dark:text-gray-400">Status</p>
             </div>
-          </div>
+          </div>}
         </div>
 
         {/* Menu Items */}
@@ -90,6 +92,14 @@ const UserProfileDropdown: React.FC<UserProfileDropdownProps> = ({ isOpen, onClo
           >
             <CreditCard className="w-5 h-5 text-gray-500 dark:text-gray-400" />
             <span className="text-gray-700 dark:text-gray-300">Billing</span>
+          </Link>
+          <Link
+            to=""
+            className="flex items-center space-x-3 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+            onClick={onClose}
+          >
+            <Video className="w-5 h-5 text-gray-500 dark:text-gray-400" />
+            <span className="text-gray-700 dark:text-gray-300">{user?.role==="viewer" && "Become Creater"}</span>
           </Link>
 
           <Link

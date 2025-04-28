@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Menu, X, Tv } from 'lucide-react';
 import ThemeToggle from './ThemeToggle';
+import UserProfileDropdown from './UserProfileDropdown';
+import { useSelector } from 'react-redux';
 
 interface NavItem {
   name: string;
@@ -19,6 +21,10 @@ const navItems: NavItem[] = [
 const Navbar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+   const [isProfileOpen, setIsProfileOpen] = useState(false);
+
+  const {token} = useSelector(state => state.auth)
+
 
   useEffect(() => {
     const handleScroll = () => {
@@ -55,7 +61,7 @@ const Navbar: React.FC = () => {
           
           {/* Desktop navigation */}
           <nav className="hidden md:flex items-center space-x-8">
-            <ul className="flex space-x-6">
+            <ul className="flex space-x-6 items-center">
               {navItems.map((item) => (
                 <li key={item.name}>
                   <a
@@ -63,12 +69,29 @@ const Navbar: React.FC = () => {
                     className="font-medium text-gray-700 hover:text-purple-600 dark:text-gray-300 dark:hover:text-purple-400 transition-colors duration-200"
                     onClick={handleNavItemClick}
                   >
-                    {item.name}
+                    {token && token !==null && item.name == "Login"  ?  <div className="relative">
+          <button
+            onClick={() => {
+              setIsProfileOpen(!isProfileOpen);
+            }}
+            className="relative w-8 h-8 rounded-full overflow-hidden hover:ring-2 hover:ring-purple-500 transition-all"
+          >
+            <img
+              src="https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=60"
+              alt="Profile"
+              className="w-full h-full object-cover"
+            />
+          </button>
+          <UserProfileDropdown 
+            isOpen={isProfileOpen} 
+            onClose={() => setIsProfileOpen(false)} 
+          />
+        </div>: item.name}
                   </a>
                 </li>
               ))}
-            </ul>
             <ThemeToggle />
+            </ul>
           </nav>
           
           {/* Mobile toggle */}

@@ -94,7 +94,8 @@ const FeaturesSection: React.FC = () => {
             <AnimatedVideo 
               src="https://assets.mixkit.co/videos/preview/mixkit-group-of-friends-partying-happily-4640-large.mp4"
               poster="https://images.pexels.com/photos/7175450/pexels-photo-7175450.jpeg?auto=compress&cs=tinysrgb&w=1200"
-              className="w-full h-auto rounded-lg transform transition-transform duration-500 hover:scale-[1.02]"
+              className="w-full h-[70vh] rounded-lg transform transition-transform duration-500 hover:scale-[1.02]"
+              
             />
             
             {/* Decorative elements */}

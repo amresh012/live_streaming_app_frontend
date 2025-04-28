@@ -2,6 +2,10 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Tv, Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import Button from '../components/Button';
+import { useDispatch } from 'react-redux';
+import { useLoginUserMutation } from '../services/authApi';
+import { login } from '../redux/slices/authSlice';
+import toast, { Toaster } from 'react-hot-toast';
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
@@ -9,14 +13,30 @@ const Login: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    // TODO: Replace with actual auth logic
-    localStorage.setItem('isAuthenticated', 'true');
-    navigate('/dashboard');
+  const dispatch = useDispatch();
+  const [loginUser, { isLoading, error }] = useLoginUserMutation();
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault()
+    try {
+      const response = await loginUser({ email, password}).unwrap();
+      dispatch(login(response));  // store user and token into Redux
+      console.log('Login Success', response);
+      if(response.success && response.role === "streamer"){
+        navigate("/dashboard")
+      }
+      else{
+        navigate("/")
+      }
+    } catch (err) {
+      console.error('Login Failed', err);
+      toast.error(err?.data.message)
+    }
   };
 
   return (
+   <>
+   <Toaster/>
     <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-gray-50 dark:bg-gray-900">
       <div className="max-w-md w-full space-y-8 bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-xl">
         <div>
@@ -40,7 +60,7 @@ const Login: React.FC = () => {
           </p>
         </div>
         
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+        <form className="mt-8 space-y-6" onSubmit={handleLogin}>
           <div className="space-y-4">
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -99,7 +119,7 @@ const Login: React.FC = () => {
           </div>
 
           <div className="flex items-center justify-between">
-            <div className="flex items-center">
+            <div className="flex items-center cursor-pointer">
               <input
                 id="remember-me"
                 name="remember-me"
@@ -112,7 +132,7 @@ const Login: React.FC = () => {
             </div>
 
             <div className="text-sm">
-              <a href="#" className="font-medium text-purple-600 hover:text-purple-500 dark:text-purple-400">
+              <a href="/forgot-password" className="font-medium text-purple-600 hover:text-purple-500 dark:text-purple-400">
                 Forgot your password?
               </a>
             </div>
@@ -124,7 +144,7 @@ const Login: React.FC = () => {
             fullWidth
             size="lg"
           >
-            Sign in
+            {isLoading ? 'Logging in...' : 'Login'}
           </Button>
         </form>
 
@@ -163,6 +183,7 @@ const Login: React.FC = () => {
         </div>
       </div>
     </div>
+   </>
   );
 };
 

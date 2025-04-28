@@ -10,14 +10,13 @@ import {
   Bell, 
   Search,
   Plus,
-  Check,
-  Play,
-  MoreVertical,
   LayoutGrid,
   LayoutList,
-  DollarSign
+  DollarSign,
+  Star
 } from 'lucide-react';
 import Button from '../components/Button';
+import MonetizationPage from './Monetization';
 import SettingsSection from './setting';
 import MessagesSection from './Message';
 import CommunitySection from './Community';
@@ -26,6 +25,9 @@ import NewStreamModal from '../components/NewStreamModal';
 import NotificationsDropdown from '../components/NotifictionDropdown';
 import UserProfileDropdown from '../components/UserProfileDropdown';
 import MultiplatformConnect from '../components/MutiPlatform';
+import RevenueChart from '../components/RevenuChart';
+import SubscriptionPage from './Subscription';
+import Sidebar from "../components/Sidebar"
 
 // Analytics Stats
 const AnalyticsSection = () => (
@@ -91,6 +93,10 @@ const RecentStreamsSection = ({ onNewStream }: { onNewStream: () => void }) => {
   ];
 
   return (
+   <>
+   <div className="mb-2">
+   <RevenueChart/>
+   </div>
     <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Recent Streams</h2>
@@ -194,6 +200,7 @@ const RecentStreamsSection = ({ onNewStream }: { onNewStream: () => void }) => {
         </div>
       )}
     </div>
+   </>
   );
 };
 
@@ -266,51 +273,9 @@ const NotificationsSection = () => {
   );
 };
 
-// Sidebar Navigation
-const Sidebar = () => {
-  const location = useLocation();
-  const isActive = (path: string) => location.pathname === path;
-
-  const navItems = [
-    { icon: <BarChart className="w-5 h-5" />, label: 'Dashboard', path: '/dashboard' },
-    { icon: <Video className="w-5 h-5" />, label: 'My Streams', path: '/dashboard/streams' },
-    { icon: <DollarSign className="w-5 h-5" />, label: 'Monetization', path: '/dashboard/monetize' },
-    { icon: <Users className="w-5 h-5" />, label: 'Community', path: '/dashboard/community' },
-    { icon: <MessageSquare className="w-5 h-5" />, label: 'Messages', path: '/dashboard/messages' },
-    { icon: <Settings className="w-5 h-5" />, label: 'Settings', path: '/dashboard/settings' },
-  ];
-
-  return (
-    <aside className="fixed left-0 top-0 h-full w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 p-4">
-      <div className="flex items-center space-x-2 mb-8">
-        <Tv className="w-8 h-8 text-purple-600 dark:text-purple-400" />
-        <span className="text-xl font-bold bg-gradient-to-r from-purple-600 to-pink-500 bg-clip-text text-transparent">
-          StreamWave
-        </span>
-      </div>
-
-      <nav className="space-y-2">
-        {navItems.map((item) => (
-          <Link
-            key={item.label}
-            to={item.path}
-            className={`flex items-center space-x-3 px-4 py-2 rounded-lg transition-colors ${
-              isActive(item.path)
-                ? 'bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400'
-                : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-            }`}
-          >
-            {item.icon}
-            <span>{item.label}</span>
-          </Link>
-        ))}
-      </nav>
-    </aside>
-  );
-};
 
 // Header with Search and Profile
-const Header = () => {
+const Header = ({ onNewStream }: { onNewStream: () => void }) => {
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
 
@@ -327,6 +292,16 @@ const Header = () => {
         </div>
       </div>
       <div className="flex items-center space-x-4">
+        <div className="">
+        <Button 
+            variant="primary" 
+            size="sm" 
+            icon={<Plus className="w-4 h-4" />}
+            onClick={onNewStream}
+          >
+            New Stream
+          </Button>
+        </div>
         <div className="relative">
           <button 
             className="relative p-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
@@ -373,7 +348,7 @@ const DashboardContent = () => {
 
   return (
     <>
-      <Header />
+      <Header onNewStream={() => setIsNewStreamModalOpen(true)} />
       <AnalyticsSection />
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2">
@@ -405,6 +380,8 @@ const Dashboard: React.FC = () => {
           <Route path="/messages" element={<MessagesSection />} />
           <Route path="/community" element={<CommunitySection />} />
           <Route path="/stream/:id" element={<LiveStream />} />
+          <Route path="/subscription" element={<SubscriptionPage />} />
+          <Route path="/monetization" element={<MonetizationPage />} />
         </Routes>
       </main>
     </div>

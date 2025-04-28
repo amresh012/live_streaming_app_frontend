@@ -16,6 +16,10 @@ import SettingsSection from './pages/setting';
 import MessagesSection from './pages/Message';
 import CommunitySection from './pages/Community';
 import LiveStream from './pages/Livestream';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
+import SubscriptionPage from './pages/Subscription';
+import MonetizationPage from './pages/Monetization';
 
 // Add global animations
 const globalStyles = `
@@ -95,6 +99,10 @@ function App() {
               <Route path='/dashboard/messages' element={<ProtectedRoute><MessagesSection/></ProtectedRoute>}/>
               <Route path='/dashboard/community' element={<ProtectedRoute><CommunitySection/></ProtectedRoute>}/>
               <Route path='/dashboard/stream/:id' element={<ProtectedRoute><LiveStream /></ProtectedRoute>}/>
+              <Route path="/dashboard/subscription" element={<ProtectedRoute><SubscriptionPage /></ProtectedRoute>} />
+              <Route path="/forgot-password" element={<ProtectedRoute><ForgotPassword /></ProtectedRoute>} />
+              <Route path="/reset-password" element={<ProtectedRoute><ResetPassword /></ProtectedRoute>} />
+              <Route path='/dashboard/monetize' element={<ProtectedRoute><MonetizationPage /></ProtectedRoute>}/>
           </Routes>
         </div>
       </Router>
