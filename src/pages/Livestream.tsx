@@ -1,21 +1,64 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { 
   Users, 
   Share2, 
   Heart,
-  MessageSquare,
-  Send,
   Gift,
   Settings,
   MoreVertical,
   Smile,
-  Image as ImageIcon
+  Image as ImageIcon,
+  Settings2
 } from 'lucide-react';
 import Button from '../components/Button';
-
+import {useSelector} from "react-redux"
 const LiveStream: React.FC = () => {
   const [message, setMessage] = useState('');
   const [isLiked, setIsLiked] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const previewRef = useRef<HTMLVideoElement>(null);
+  const [mediaStream, setMediaStream] = useState<MediaStream | null>(null);
+  const [recordedChunks, setRecordedChunks] = useState<Blob[]>([]);
+  const [isRecording, setIsRecording] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
+
+
+  const {user} = useSelector((state) => state.auth)
+
+  // Start Camera
+  const startStream = async () => {
+    try {
+      const mediaStream = await navigator.mediaDevices.getUserMedia({
+        video: true,
+        audio: true,
+      });
+
+      if (videoRef.current) {
+        videoRef.current.srcObject = mediaStream;
+        await videoRef.current.play();
+      }
+    } catch (error) {
+      console.error('Error accessing media devices.', error);
+    }
+  };
+  useEffect(() => {
+    startStream(); // start camera automatically when page loads
+    // If you want manual start, remove this useEffect
+  }, []);
+
+
+  const stopMedia = () => {
+    if (mediaStream) {
+      mediaStream.getTracks().forEach(track => track.stop());
+    }
+  
+    const videoEl = document.getElementById("video") as HTMLVideoElement;
+    if (videoEl) {
+      videoEl.srcObject = null;
+    }
+  };
 
   const messages = [
     {
@@ -51,36 +94,165 @@ const LiveStream: React.FC = () => {
     setMessage('');
   };
 
+  // const startCamera = async () => {
+  //   const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+  //   if (videoRef.current) {
+  //     videoRef.current.srcObject = stream;
+  //     videoRef.current.play();
+  //   }
+  // };
+
+  const startRecording = () => {
+    if (videoRef.current?.srcObject) {
+      const recorder = new MediaRecorder(videoRef.current.srcObject as MediaStream);
+      setRecordedChunks([]);
+      setMediaRecorder(recorder);
+
+      recorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          setRecordedChunks(prev => [...prev, event.data]);
+        }
+      };
+
+      recorder.start();
+      setIsRecording(true);
+      console.log("Recording started...");
+    }
+  };
+
+  const stopRecording = () => {
+    mediaRecorder?.stop();
+    setIsRecording(false);
+    console.log("Recording stopped...");
+  };
+
+  // const uploadRecording = async () => {
+  //   if (recordedChunks.length === 0) return;
+
+  //   const blob = new Blob(recordedChunks, { type: 'video/webm' });
+  //   const formData = new FormData();
+  //   formData.append('file', blob, 'recording.webm');
+
+  //   setIsUploading(true);
+  //   try {
+  //     const response = await fetch('http://localhost:3000/upload', {
+  //       method: 'POST',
+  //       body: formData,
+  //     });
+  //    console.log(response)
+  //     if (response.ok) {
+  //       alert('Upload successful!');
+  //       console.log('Uploaded successfully!');
+  //     } else {
+  //       alert('Upload failed.');
+  //     }
+  //   } catch (error) {
+  //     console.error('Upload error:', error);
+  //   } finally {
+  //     setIsUploading(false);
+  //   }
+  // };
+
+
+  const uploadRecording = async () => {
+    if (recordedChunks.length === 0) return;
+
+    const blob = new Blob(recordedChunks, { type: 'video/webm' });
+    const formData = new FormData();
+    formData.append('file', blob, 'recording.webm');
+
+    setIsUploading(true);
+    setUploadProgress(0);
+
+    try {
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', 'http://localhost:3000/upload');
+
+      xhr.upload.onprogress = (event) => {
+        if (event.lengthComputable) {
+          const percent = (event.loaded / event.total) * 100;
+          setUploadProgress(percent);
+        }
+      };
+
+      xhr.onload = () => {
+        if (xhr.status === 200) {
+          alert('Upload successful!');
+          console.log('Uploaded successfully!');
+        } else {
+          alert('Upload failed.');
+        }
+        setIsUploading(false);
+      };
+
+      xhr.onerror = () => {
+        console.error('Upload error');
+        setIsUploading(false);
+      };
+
+      xhr.send(formData);
+    } catch (error) {
+      console.error('Upload error:', error);
+      setIsUploading(false);
+    }
+  };
+
   return (
-    <div className="h-[calc(100vh-2rem)] flex flex-col lg:flex-row gap-4 p-4">
+    <div className="h-[calc(100vh-2rem)] overflow-y-scroll flex flex-col lg:flex-row gap-4 p-4">
       {/* Main Content */}
       <div className="flex-1">
         {/* Video Player */}
         <div className="relative aspect-video bg-black rounded-xl overflow-hidden">
-          <video
-            className="w-full h-full object-contain"
-            src="https://assets.mixkit.co/videos/preview/mixkit-software-developer-working-on-code-screen-close-up-1728-large.mp4"
+        <video
+            ref={videoRef}
+            className="w-full h-full object-cover"
             autoPlay
+            muted
+            playsInline
             controls
           />
           <div className="absolute top-4 left-4 px-2 py-1 bg-red-500 text-white text-sm font-medium rounded-full flex items-center">
             <span className="w-2 h-2 bg-white rounded-full animate-pulse mr-2"></span>
             LIVE
           </div>
-          <div className="absolute top-4 right-4 flex items-center space-x-2">
+          <div className="absolute top-4 right-2 flex items-center space-x-2">
             <div className="px-3 py-1 bg-black/50 text-white rounded-full text-sm flex items-center">
               <Users className="w-4 h-4 mr-2" />
               1.2k viewers
             </div>
           </div>
+          <div className="absolute top-2 left-20 flex items-center space-x-2">
+            <div className=" text-sm flex items-center">
+            {!isRecording ? (
+          <Button onClick={startRecording} variant='ghost'>Start Recording</Button>
+        ) : (
+          <Button onClick={stopRecording} variant="ghost">Stop Recording</Button>
+        )}
+        
+            </div>
+          </div>
+          
         </div>
+        {/* <div className="flex gap-2">
+        <Button onClick={startCamera}>Start Camera</Button>
+        {!isRecording ? (
+          <Button onClick={startRecording}>Start Recording</Button>
+        ) : (
+          <Button onClick={stopRecording} variant="outline">Stop Recording</Button>
+        )}
+        {recordedChunks.length > 0 && (
+          <Button onClick={uploadRecording} disabled={isUploading}>
+            {isUploading ? 'Uploading...' : 'Upload Recording'}
+          </Button>
+        )}
+      </div> */}
 
         {/* Stream Info */}
         <div className="mt-4 bg-white dark:bg-gray-800 rounded-xl p-6">
           <div className="flex items-start justify-between">
             <div>
               <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-                Design Systems Workshop
+                My new Toy
               </h1>
               <div className="flex items-center mt-2 space-x-4">
                 <div className="flex items-center">
@@ -90,11 +262,14 @@ const LiveStream: React.FC = () => {
                     className="w-10 h-10 rounded-full object-cover"
                   />
                   <div className="ml-3">
-                    <p className="font-medium text-gray-900 dark:text-white">Alex Johnson</p>
+                    <p className="font-medium text-gray-900 dark:text-white">{user?.name || "Alex Johnson"}</p>
                     <p className="text-sm text-gray-500 dark:text-gray-400">1.2M followers</p>
                   </div>
                 </div>
                 <Button variant="primary">Follow</Button>
+                <div onClick={stopMedia} className="">
+                <Button  variant="outline">Stop Stream</Button>
+                </div>
               </div>
             </div>
             <div className="flex items-center space-x-2">
@@ -131,7 +306,26 @@ const LiveStream: React.FC = () => {
               </span>
             </div>
           </div>
+          {recordedChunks.length > 0 && (
+        <div className="space-y-2">
+          <h2 className="font-semibold">Recorded Preview:</h2>
+          <video ref={previewRef} controls className="w-full rounded-lg bg-gray-100" />
+          <Button onClick={uploadRecording} disabled={isUploading}>
+            {isUploading ? `Uploading... ${Math.round(uploadProgress)}%` : 'Upload Recording'}
+          </Button>
+          {/* Progress bar */}
+          {isUploading && (
+            <div className="w-full bg-gray-200 rounded-full h-2.5 mt-2">
+              <div
+                className="bg-blue-600 h-2.5 rounded-full"
+                style={{ width: `${uploadProgress}%` }}
+              />
+            </div>
+          )}
         </div>
+      )}
+        </div>
+        
       </div>
 
       {/* Chat Section */}
@@ -149,6 +343,7 @@ const LiveStream: React.FC = () => {
               </button>
             </div>
           </div>
+          {/* preview */}
         </div>
 
         {/* Messages */}
@@ -222,6 +417,7 @@ const LiveStream: React.FC = () => {
           </form>
         </div>
       </div>
+      
     </div>
   );
 };

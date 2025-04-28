@@ -26,7 +26,7 @@ const Register: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle registration logic here
+    // Handle registration logic
     try {
       const res = await axios.post(`${base_url}auth/register`, formdata);
       // console.log(res)

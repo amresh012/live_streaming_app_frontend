@@ -2,6 +2,9 @@ import React, { useState } from 'react';
 import { X, Video, Calendar, Tag } from 'lucide-react';
 import Button from './Button';
 import { useCreateStreamMutation } from '../services/streamApi';
+import {useNavigate} from "react-router-dom"
+import {useDispatch} from "react-redux"
+import {updateField} from "../redux/slices/streamslice"
 interface NewStreamModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -9,13 +12,17 @@ interface NewStreamModalProps {
 
 const NewStreamModal: React.FC<NewStreamModalProps> = ({ isOpen, onClose }) => {
   const [createStream, { isLoading }] = useCreateStreamMutation();
+  const navigate = useNavigate() 
+  const dispatch = useDispatch()
+
   const [streamData, setStreamData] = useState({
     title: '',
     description: '',
     category: '',
-    scheduledAt: '',
+    scheduledAt: Date.now(),
     isPrivate: false
   });
+
 
   // const handleSubmit = (e: React.FormEvent) => {
   //   e.preventDefault();
@@ -29,17 +36,19 @@ const NewStreamModal: React.FC<NewStreamModalProps> = ({ isOpen, onClose }) => {
     try {
       const payload = {
         ...streamData,
-        scheduledAt: streamData.date && streamData.time 
-          ? new Date(`${streamData.date}T${streamData.time}`).toISOString()
-          : null,
+        scheduledAt: streamData.scheduledAt 
+        ? new Date(`${streamData.scheduledAt}`).toISOString()
+        : null,
       };
       
       const response = await createStream(payload).unwrap();
-      
-      console.log('Stream Created ✅', response);
+      dispatch(updateField(response))
+      navigate(`/dashboard/stream/${response?.stream?.streamer}`, {state:response})
+      console.log('Stream Created ✅', response?.stream);
   
       // Show Stream Key + URL to user (if needed) or redirect to Live Room
       onClose();
+
     } catch (error) {
       console.error('Error creating stream ❌', error);
     }

@@ -22,6 +22,7 @@ const streamSlice = createSlice({
   initialState,
   reducers: {
     updateField: <K extends keyof StreamData>(state: { [x: string]: string | boolean; }, action: PayloadAction<{ key: K; value: StreamData[K] }>) => {
+      console.log(action.payload)
       state[action.payload.key] = action.payload.value;
     },
     resetStream: () => initialState,

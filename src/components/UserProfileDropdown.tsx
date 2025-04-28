@@ -156,7 +156,7 @@ const UserProfileDropdown: React.FC<UserProfileDropdownProps> = ({ isOpen, onClo
           <button
             onClick={() => {
               // Handle logout
-              localStorage.removeItem('isAuthenticated');
+              localStorage.removeItem('token');
               window.location.href = '/login';
             }}
             className="w-full flex items-center space-x-3 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-red-600 dark:text-red-400 transition-colors"

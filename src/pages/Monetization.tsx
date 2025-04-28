@@ -1,5 +1,5 @@
 import React from 'react';
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { DollarSign, TrendingUp, Users, Gift, CreditCard, Clock, ArrowUpRight, Filter } from 'lucide-react';
 import Button from '../components/Button';
 
@@ -21,17 +21,20 @@ const topDonators = [
 ];
 
 const MonetizationPage: React.FC = () => {
+  const width = window.innerWidth
   return (
     <div className="space-y-8 p-4"  >
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="lg:flex md:grid grid-cols-2  items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Monetization</h1>
           <p className="text-gray-600 dark:text-gray-400">Track your earnings and manage payouts</p>
         </div>
-        <Button variant="outline" icon={<Filter className="w-4 h-4" />}>
+       {width >500 ? <Button variant="outline" icon={<Filter className="w-4 h-4" />}>
           Filter by Date
-        </Button>
+        </Button>: <Button size='sm' variant="outline" icon={<Filter className="w-4 h-4" />}>
+          Filter
+        </Button>}
       </div>
 
       {/* Stats Overview */}
@@ -98,7 +101,7 @@ const MonetizationPage: React.FC = () => {
 
       {/* Revenue Chart */}
       <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
-        <div className="flex items-center justify-between mb-6">
+        <div className="lg:flex md:grid md:grid-cols-2 sm:grid-cols-1  items-center justify-between mb-6">
           <div>
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Revenue Breakdown</h2>
             <p className="text-sm text-gray-600 dark:text-gray-400">Last 7 days of earnings</p>
@@ -249,14 +252,16 @@ const MonetizationPage: React.FC = () => {
 
       {/* Payout Settings */}
       <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
-        <div className="flex items-center justify-between mb-6">
+        <div className="lg:flex md:grid grid-cols-2 items-center justify-between mb-6">
           <div>
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Payout Settings</h2>
             <p className="text-sm text-gray-600 dark:text-gray-400">Manage your payment methods and schedule</p>
           </div>
-          <Button variant="outline" icon={<CreditCard className="w-4 h-4" />}>
+         {width > 500 ? <Button variant="outline" icon={<CreditCard className="w-4 h-4" />}>
             Update Payment Info
-          </Button>
+          </Button>:<Button size='sm' variant="outline" icon={<CreditCard className="w-4 h-4" />}>
+            Update Info
+          </Button>}
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
