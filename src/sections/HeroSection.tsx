@@ -28,9 +28,9 @@ const token = localStorage.getItem("token")
               </p>
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-4">
+            <div className="flex flex-col sm:flex-row gap-4 ">
                { token ?
-               <Link to="/dashboard">
+               <Link to="/dashboard" >
                  <Button 
                 variant="primary" 
                 size="lg" 

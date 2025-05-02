@@ -1,19 +1,22 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { 
-  Users, 
-  Share2, 
+import React, { useEffect, useRef, useState } from "react";
+import {
+  Users,
+  Share2,
   Heart,
   Gift,
   Settings,
   MoreVertical,
   Smile,
   Image as ImageIcon,
-  Settings2
-} from 'lucide-react';
-import Button from '../components/Button';
-import {useSelector} from "react-redux"
+  Settings2,
+} from "lucide-react";
+import Button from "../components/Button";
+import { useSelector } from "react-redux";
+import EmojiPicker from "@emoji-mart/react";
+import data from '@emoji-mart/data';
+
 const LiveStream: React.FC = () => {
-  const [message, setMessage] = useState('');
+  const [message, setMessage] = useState("");
   const [isLiked, setIsLiked] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const previewRef = useRef<HTMLVideoElement>(null);
@@ -22,10 +25,13 @@ const LiveStream: React.FC = () => {
   const [isRecording, setIsRecording] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
-  const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
+  const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(
+    null
+  );
+  const emojiPickerRef = useRef(null);
+  const [showPicker, setShowPicker] = useState(false);
 
-
-  const {user} = useSelector((state) => state.auth)
+  const { user } = useSelector((state) => state.auth);
 
   // Start Camera
   const startStream = async () => {
@@ -40,7 +46,7 @@ const LiveStream: React.FC = () => {
         await videoRef.current.play();
       }
     } catch (error) {
-      console.error('Error accessing media devices.', error);
+      console.error("Error accessing media devices.", error);
     }
   };
   useEffect(() => {
@@ -48,12 +54,11 @@ const LiveStream: React.FC = () => {
     // If you want manual start, remove this useEffect
   }, []);
 
-
   const stopMedia = () => {
     if (mediaStream) {
-      mediaStream.getTracks().forEach(track => track.stop());
+      mediaStream.getTracks().forEach((track) => track.stop());
     }
-  
+
     const videoEl = document.getElementById("video") as HTMLVideoElement;
     if (videoEl) {
       videoEl.srcObject = null;
@@ -64,34 +69,37 @@ const LiveStream: React.FC = () => {
     {
       id: 1,
       user: "Sarah",
-      avatar: "https://images.pexels.com/photos/1239291/pexels-photo-1239291.jpeg?auto=compress&cs=tinysrgb&w=100",
+      avatar:
+        "https://images.pexels.com/photos/1239291/pexels-photo-1239291.jpeg?auto=compress&cs=tinysrgb&w=100",
       message: "Great stream! Love the content 🎉",
       time: "2m ago",
-      isModerator: true
+      isModerator: true,
     },
     {
       id: 2,
       user: "Alex",
-      avatar: "https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=100",
+      avatar:
+        "https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=100",
       message: "Could you explain that last part again?",
       time: "1m ago",
-      isSubscriber: true
+      isSubscriber: true,
     },
     {
       id: 3,
       user: "Mike",
-      avatar: "https://images.pexels.com/photos/937481/pexels-photo-937481.jpeg?auto=compress&cs=tinysrgb&w=100",
+      avatar:
+        "https://images.pexels.com/photos/937481/pexels-photo-937481.jpeg?auto=compress&cs=tinysrgb&w=100",
       message: "Thanks for sharing your knowledge!",
       time: "Just now",
-      isSubscriber: true
-    }
+      isSubscriber: true,
+    },
   ];
 
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault();
     if (!message.trim()) return;
     // Handle sending message
-    setMessage('');
+    setMessage("");
   };
 
   // const startCamera = async () => {
@@ -104,13 +112,15 @@ const LiveStream: React.FC = () => {
 
   const startRecording = () => {
     if (videoRef.current?.srcObject) {
-      const recorder = new MediaRecorder(videoRef.current.srcObject as MediaStream);
+      const recorder = new MediaRecorder(
+        videoRef.current.srcObject as MediaStream
+      );
       setRecordedChunks([]);
       setMediaRecorder(recorder);
 
       recorder.ondataavailable = (event) => {
         if (event.data.size > 0) {
-          setRecordedChunks(prev => [...prev, event.data]);
+          setRecordedChunks((prev) => [...prev, event.data]);
         }
       };
 
@@ -153,20 +163,19 @@ const LiveStream: React.FC = () => {
   //   }
   // };
 
-
   const uploadRecording = async () => {
     if (recordedChunks.length === 0) return;
 
-    const blob = new Blob(recordedChunks, { type: 'video/webm' });
+    const blob = new Blob(recordedChunks, { type: "video/webm" });
     const formData = new FormData();
-    formData.append('file', blob, 'recording.webm');
+    formData.append("file", blob, "recording.webm");
 
     setIsUploading(true);
     setUploadProgress(0);
 
     try {
       const xhr = new XMLHttpRequest();
-      xhr.open('POST', 'http://localhost:3000/upload');
+      xhr.open("POST", "http://localhost:3000/upload");
 
       xhr.upload.onprogress = (event) => {
         if (event.lengthComputable) {
@@ -177,24 +186,28 @@ const LiveStream: React.FC = () => {
 
       xhr.onload = () => {
         if (xhr.status === 200) {
-          alert('Upload successful!');
-          console.log('Uploaded successfully!');
+          alert("Upload successful!");
+          console.log("Uploaded successfully!");
         } else {
-          alert('Upload failed.');
+          alert("Upload failed.");
         }
         setIsUploading(false);
       };
 
       xhr.onerror = () => {
-        console.error('Upload error');
+        console.error("Upload error");
         setIsUploading(false);
       };
 
       xhr.send(formData);
     } catch (error) {
-      console.error('Upload error:', error);
+      console.error("Upload error:", error);
       setIsUploading(false);
     }
+  };
+
+  const handleEmojiSelect = (emoji: any) => {
+    setMessageInput((prev) => prev + emoji.native);
   };
 
   return (
@@ -203,7 +216,7 @@ const LiveStream: React.FC = () => {
       <div className="flex-1">
         {/* Video Player */}
         <div className="relative aspect-video bg-black rounded-xl overflow-hidden">
-        <video
+          <video
             ref={videoRef}
             className="w-full h-full object-cover"
             autoPlay
@@ -223,15 +236,17 @@ const LiveStream: React.FC = () => {
           </div>
           <div className="absolute top-2 left-20 flex items-center space-x-2">
             <div className=" text-sm flex items-center">
-            {!isRecording ? (
-          <Button onClick={startRecording} variant='ghost'>Start Recording</Button>
-        ) : (
-          <Button onClick={stopRecording} variant="ghost">Stop Recording</Button>
-        )}
-        
+              {!isRecording ? (
+                <Button onClick={startRecording} variant="ghost">
+                  Start Recording
+                </Button>
+              ) : (
+                <Button onClick={stopRecording} variant="ghost">
+                  Stop Recording
+                </Button>
+              )}
             </div>
           </div>
-          
         </div>
         {/* <div className="flex gap-2">
         <Button onClick={startCamera}>Start Camera</Button>
@@ -262,13 +277,17 @@ const LiveStream: React.FC = () => {
                     className="w-10 h-10 rounded-full object-cover"
                   />
                   <div className="ml-3">
-                    <p className="font-medium text-gray-900 dark:text-white">{user?.name || "Alex Johnson"}</p>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">1.2M followers</p>
+                    <p className="font-medium text-gray-900 dark:text-white">
+                      {user?.name || "Alex Johnson"}
+                    </p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      1.2M followers
+                    </p>
                   </div>
                 </div>
                 <Button variant="primary">Follow</Button>
                 <div onClick={stopMedia} className="">
-                <Button  variant="outline">Stop Stream</Button>
+                  <Button variant="outline">Stop Stream</Button>
                 </div>
               </div>
             </div>
@@ -281,18 +300,20 @@ const LiveStream: React.FC = () => {
                 Share
               </Button>
               <Button
-                variant={isLiked ? 'primary' : 'outline'}
+                variant={isLiked ? "primary" : "outline"}
                 icon={<Heart className="w-4 h-4" />}
                 onClick={() => setIsLiked(!isLiked)}
               >
-                {isLiked ? 'Liked' : 'Like'}
+                {isLiked ? "Liked" : "Like"}
               </Button>
             </div>
           </div>
-          
-          <div className="mt-6">
+
+          {/* <div className="mt-6">
             <p className="text-gray-700 dark:text-gray-300">
-              Join me as we explore the fundamentals of design systems and how to implement them effectively in your projects. We'll cover component architecture, documentation, and best practices.
+              Join me as we explore the fundamentals of design systems and how
+              to implement them effectively in your projects. We'll cover
+              component architecture, documentation, and best practices.
             </p>
             <div className="mt-4 flex flex-wrap gap-2">
               <span className="px-3 py-1 bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400 rounded-full text-sm">
@@ -305,27 +326,32 @@ const LiveStream: React.FC = () => {
                 Development
               </span>
             </div>
-          </div>
+          </div> */}
           {recordedChunks.length > 0 && (
-        <div className="space-y-2">
-          <h2 className="font-semibold">Recorded Preview:</h2>
-          <video ref={previewRef} controls className="w-full rounded-lg bg-gray-100" />
-          <Button onClick={uploadRecording} disabled={isUploading}>
-            {isUploading ? `Uploading... ${Math.round(uploadProgress)}%` : 'Upload Recording'}
-          </Button>
-          {/* Progress bar */}
-          {isUploading && (
-            <div className="w-full bg-gray-200 rounded-full h-2.5 mt-2">
-              <div
-                className="bg-blue-600 h-2.5 rounded-full"
-                style={{ width: `${uploadProgress}%` }}
+            <div className="space-y-2">
+              <h2 className="font-semibold">Recorded Preview:</h2>
+              <video
+                ref={previewRef}
+                controls
+                className="w-full rounded-lg bg-gray-100"
               />
+              <Button onClick={uploadRecording} disabled={isUploading}>
+                {isUploading
+                  ? `Uploading... ${Math.round(uploadProgress)}%`
+                  : "Upload Recording"}
+              </Button>
+              {/* Progress bar */}
+              {isUploading && (
+                <div className="w-full bg-gray-200 rounded-full h-2.5 mt-2">
+                  <div
+                    className="bg-blue-600 h-2.5 rounded-full"
+                    style={{ width: `${uploadProgress}%` }}
+                  />
+                </div>
+              )}
             </div>
           )}
         </div>
-      )}
-        </div>
-        
       </div>
 
       {/* Chat Section */}
@@ -333,7 +359,9 @@ const LiveStream: React.FC = () => {
         {/* Chat Header */}
         <div className="p-4 border-b border-gray-200 dark:border-gray-700">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Live Chat</h2>
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+              Live Chat
+            </h2>
             <div className="flex items-center space-x-2">
               <button className="text-gray-500 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-300">
                 <Settings className="w-5 h-5" />
@@ -397,9 +425,21 @@ const LiveStream: React.FC = () => {
                 <button
                   type="button"
                   className="p-1.5 text-gray-500 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-300"
+                  onClick={() => setShowPicker(!showPicker)}
                 >
                   <Smile className="w-5 h-5" />
                 </button>
+                {showPicker && (
+                  <div
+                    ref={emojiPickerRef}
+                    className="absolute bottom-16 left-0 z-10"
+                  >
+                    <EmojiPicker
+                      onEmojiSelect={handleEmojiSelect}
+                      data={data}
+                    />
+                  </div>
+                )}
                 <button
                   type="button"
                   className="p-1.5 text-gray-500 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-300"
@@ -417,7 +457,6 @@ const LiveStream: React.FC = () => {
           </form>
         </div>
       </div>
-      
     </div>
   );
 };

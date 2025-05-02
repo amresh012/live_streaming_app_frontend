@@ -15,7 +15,7 @@ import ProtectedRoute from './components/ProtectedRoutes';
 import SettingsSection from './pages/setting';
 import MessagesSection from './pages/Message';
 import CommunitySection from './pages/Community';
-import LiveStream from './pages/Livestream';
+import LiveStream from './pages/LiveStreaml';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
 import SubscriptionPage from './pages/Subscription';
