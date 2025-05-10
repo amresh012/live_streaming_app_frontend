@@ -63,6 +63,10 @@ Join Room
 
 ----
 
+## 📸 Screenshots
+![Uploading screencapture-live-streaming-app-frontend-vercel-app-2025-05-11-00_08_33.png…]()
+
+
 ## 🧪 Todo
  -- [✔]Add stream recording
 
