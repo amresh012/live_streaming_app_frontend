@@ -38,7 +38,7 @@ const NewStreamModal: React.FC<NewStreamModalProps> = ({ isOpen, onClose }) => {
         ...streamData,
         scheduledAt: streamData.scheduledAt 
         ? new Date(`${streamData.scheduledAt}`).toISOString()
-        : null,
+        :new Date().toISOString(),
       };
       
       const response = await createStream(payload).unwrap();

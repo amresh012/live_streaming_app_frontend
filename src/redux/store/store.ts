@@ -11,7 +11,7 @@ import { combineReducers } from 'redux';
 const persistConfig = {
   key: 'root',
   storage,
-  whitelist: ['auth'],  // ✅ Only persist auth slice
+  whitelist: ['auth', 'stream'],  // ✅ Only persist auth slice
 };
 
 const rootReducer = combineReducers({

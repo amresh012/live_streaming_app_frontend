@@ -1,19 +1,11 @@
 import React, { useState } from 'react';
-import { Link, Route, Routes, useLocation } from 'react-router-dom';
+import {  Route, Routes,  } from 'react-router-dom';
 import { 
-  Tv, 
-  Settings, 
-  Users, 
-  BarChart, 
-  Video, 
-  MessageSquare, 
   Bell, 
   Search,
   Plus,
   LayoutGrid,
   LayoutList,
-  DollarSign,
-  Star
 } from 'lucide-react';
 import Button from '../components/Button';
 import MonetizationPage from './Monetization';

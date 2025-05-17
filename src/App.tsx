@@ -20,6 +20,7 @@ import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
 import SubscriptionPage from './pages/Subscription';
 import MonetizationPage from './pages/Monetization';
+import ViewerPage from './pages/ViwerPage';
 
 // Add global animations
 const globalStyles = `
@@ -100,9 +101,10 @@ function App() {
               <Route path='/dashboard/community' element={<ProtectedRoute><CommunitySection/></ProtectedRoute>}/>
               <Route path='/dashboard/stream/:id' element={<ProtectedRoute><LiveStream /></ProtectedRoute>}/>
               <Route path="/dashboard/subscription" element={<ProtectedRoute><SubscriptionPage /></ProtectedRoute>} />
-              <Route path="/forgot-password" element={<ProtectedRoute><ForgotPassword /></ProtectedRoute>} />
+              <Route path="/forgot-password" element={<ForgotPassword />} />
               <Route path="/reset-password" element={<ProtectedRoute><ResetPassword /></ProtectedRoute>} />
               <Route path='/dashboard/monetize' element={<ProtectedRoute><MonetizationPage /></ProtectedRoute>}/>
+              <Route path="/watch" element={<ViewerPage/>} />
           </Routes>
         </div>
       </Router>

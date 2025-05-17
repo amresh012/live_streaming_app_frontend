@@ -1,57 +1,253 @@
-import React, { useState } from 'react';
-import { Users, Share2, Heart, MessageSquare, Send, Gift, Settings, MoreVertical, Smile, Image as ImageIcon, SwordIcon as Record, Copy, UserPlus, Link2, Video, Mic, ScreenShare, StopCircle } from 'lucide-react';
-import Button from '../components/Button';
+import React, { useRef, useState } from "react";
+import {
+  Users,
+  Share2,
+  Heart,
+  Send,
+  Gift,
+  Settings,
+  MoreVertical,
+  Smile,
+  Image as ImageIcon,
+  SwordIcon as Record,
+  Copy,
+  UserPlus,
+  Video,
+  Mic,
+  ScreenShare,
+  StopCircle,
+} from "lucide-react";
+import Button from "../components/Button";
+import { base_url } from "../utils/base_url";
 
 const LiveStream: React.FC = () => {
-  const [message, setMessage] = useState('');
+  const [message, setMessage] = useState("");
   const [isLiked, setIsLiked] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [isVideoEnabled, setIsVideoEnabled] = useState(true);
   const [isScreenSharing, setIsScreenSharing] = useState(false);
   const [showInviteModal, setShowInviteModal] = useState(false);
+  const [mediaStream, setMediaStream] = useState<MediaStream | null>(null);
+  const [email, setEmail] = useState<string>("");
+  const [status, setStatus] = useState<string | null>(null);
+  const [invitelink] = useState<string>(window.location.href)
+ console.log(email)
+
+  // ref
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const socketRef = useRef<WebSocket | null>(null);
+  const recorderRef = useRef<MediaRecorder | null>(null);
+  const recordedChunksRef = useRef<Blob[]>([])
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+
+
+  // start stream
+  const startStream = async () => {
+    try {
+      const mediaStream = await navigator.mediaDevices.getUserMedia({
+        video: true,
+        audio: true,
+      });
+
+      if (videoRef.current) {
+        videoRef.current.srcObject = mediaStream;
+        await videoRef.current.play();
+      }
+    } catch (error) {
+      console.error("Error accessing media devices.", error);
+    }
+  };
+
+  // stop
+  
+  const stopMedia = () => {
+    if (mediaStream) {
+      mediaStream.getTracks().forEach((track) => track.stop());
+      setMediaStream(null);
+    }
+    if (videoRef.current) {
+      videoRef.current.srcObject = null;
+    }
+    setIsScreenSharing(false);
+  };
+
+  // screen sharing
+  const startScreenShare = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getDisplayMedia({
+        video: true,
+        audio: false,
+      });
+
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+        videoRef.current.play();
+      }
+
+      const socket = new WebSocket("ws://localhost:8080");
+      socketRef.current = socket;
+
+      socket.onopen = () => {
+        const recorder = new MediaRecorder(stream, {
+          mimeType: "video/webm; codecs=vp8",
+        });
+
+        recorder.ondataavailable = (event) => {
+          if (event.data.size > 0 && socket.readyState === WebSocket.OPEN) {
+            socket.send(event.data);
+          }
+        };
+
+        recorder.start(500);
+        recorderRef.current = recorder;
+
+        stream.getTracks().forEach((track) => {
+          track.onended = () => stopScreenShare();
+        });
+      };
+    } catch (err) {
+      console.error("Screen sharing failed:", err);
+    }
+  };
+
+  const stopScreenShare = () => {
+    if (recorderRef.current) {
+      recorderRef.current.stop();
+      recorderRef.current = null;
+    }
+
+    if (socketRef.current) {
+      socketRef.current.close();
+      socketRef.current = null;
+    }
+
+    setIsScreenSharing(false);
+  };
+
+  const toggleScreenShare = () => {
+    if (isScreenSharing) {
+      stopScreenShare();
+
+    } else {
+      setIsScreenSharing(true);
+      startScreenShare();
+    }
+  };
+
+  const toggleMedia = ()=>{
+    if(!isVideoEnabled){
+      startStream();
+    }
+    else{
+      setIsVideoEnabled(false)
+      stopMedia()
+    }
+  }
+
+  // recording
+  
+  const startRecording = () => {
+    if (videoRef.current && videoRef.current.srcObject) {
+      const stream = videoRef.current.srcObject as MediaStream;
+      const recorder = new MediaRecorder(stream);
+
+      recorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          recordedChunksRef.current.push(event.data);
+        }
+      };
+
+      recorder.onstop = () => {
+        const blob = new Blob(recordedChunksRef.current, { type: 'video/webm' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'recording.webm';
+        a.click();
+        recordedChunksRef.current = [];
+      };
+
+      recorder.start();
+      mediaRecorderRef.current = recorder;
+      setIsRecording(true);
+    }
+  };
+
+  const stopRecording = () => {
+    if (mediaRecorderRef.current) {
+      mediaRecorderRef.current.stop();
+      setIsRecording(false);
+    }
+  };
+
+
 
   const messages = [
     {
       id: 1,
       user: "Sarah",
-      avatar: "https://images.pexels.com/photos/1239291/pexels-photo-1239291.jpeg?auto=compress&cs=tinysrgb&w=100",
+      avatar:
+        "https://images.pexels.com/photos/1239291/pexels-photo-1239291.jpeg?auto=compress&cs=tinysrgb&w=100",
       message: "Great stream! Love the content 🎉",
       time: "2m ago",
       isModerator: true,
-      isLive:true
+      isLive: true,
     },
     {
       id: 2,
       user: "Alex",
-      avatar: "https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=100",
+      avatar:
+        "https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=100",
       message: "Could you explain that last part again?",
       time: "1m ago",
       isSubscriber: true,
-      isLive:false
-
+      isLive: false,
     },
     {
       id: 3,
       user: "Mike",
-      avatar: "https://images.pexels.com/photos/937481/pexels-photo-937481.jpeg?auto=compress&cs=tinysrgb&w=100",
+      avatar:
+        "https://images.pexels.com/photos/937481/pexels-photo-937481.jpeg?auto=compress&cs=tinysrgb&w=100",
       message: "Thanks for sharing your knowledge!",
       time: "Just now",
       isSubscriber: true,
-      isLive:true
-
-    }
+      isLive: true,
+    },
   ];
 
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault();
     if (!message.trim()) return;
-    setMessage('');
+    setMessage("");
   };
 
   const handleCopyInviteLink = () => {
-    navigator.clipboard.writeText('https://streamwave.com/room/xyz123');
+    navigator.clipboard.writeText("https://streamwave.com/room/xyz123");
   };
+
+  // invite by mail
+  const handleInvite = async ( email : string, link:string ) => {
+    console.log(link)
+    try {
+      const res = await fetch(`${base_url}invite`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email ,link}),
+      });
+      console.log(res)
+      if (res.ok) {
+        setStatus('Invitation sent!');
+      } else {
+        const { error } = await res.json();
+        setStatus(`Error: ${error}`);
+      }
+    } catch (err) {
+      setStatus('Something went wrong.',err);
+    }
+  };
+
+  
 
   const InviteModal = () => (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
@@ -59,14 +255,16 @@ const LiveStream: React.FC = () => {
         <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
           Invite People to Your Stream
         </h3>
-        
+
         <div className="space-y-4">
           <div className="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-lg">
-            <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">Share this link with others:</p>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+              Share this link with others:
+            </p>
             <div className="flex items-center space-x-2">
               <input
                 type="text"
-                value="https://streamwave.com/room/xyz123"
+                value={invitelink}
                 readOnly
                 className="flex-1 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg px-3 py-2 text-sm"
               />
@@ -87,7 +285,10 @@ const LiveStream: React.FC = () => {
             </label>
             <div className="flex items-center space-x-2">
               <input
+                name="email"
                 type="email"
+                value={email}
+                onChange={(e)=>setEmail(e.target.value)}
                 placeholder="Enter email address"
                 className="flex-1 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg px-3 py-2 text-sm"
               />
@@ -95,6 +296,7 @@ const LiveStream: React.FC = () => {
                 variant="primary"
                 size="sm"
                 icon={<Send className="w-4 h-4" />}
+                onClick={()=>handleInvite(email,invitelink)}
               >
                 Send
               </Button>
@@ -103,10 +305,7 @@ const LiveStream: React.FC = () => {
         </div>
 
         <div className="mt-6 flex justify-end">
-          <Button
-            variant="ghost"
-            onClick={() => setShowInviteModal(false)}
-          >
+          <Button variant="ghost" onClick={() => setShowInviteModal(false)}>
             Close
           </Button>
         </div>
@@ -122,61 +321,70 @@ const LiveStream: React.FC = () => {
         <div className="bg-white dark:bg-gray-800 rounded-xl p-4 mb-4 flex items-center justify-between">
           <div className="flex items-center space-x-4">
             <Button
-              variant={isVideoEnabled ? 'primary' : 'outline'}
+              variant={isVideoEnabled ? "primary" : "outline"}
               size="sm"
               icon={<Video className="w-4 h-4" />}
-              onClick={() => setIsVideoEnabled(!isVideoEnabled)}
+              onClick={toggleMedia}
             >
-              {isVideoEnabled ? 'Video On' : 'Video Off'}
+              {isVideoEnabled ? "Video On" : "Video Off"}
             </Button>
             <Button
-              variant={!isMuted ? 'primary' : 'outline'}
+              variant={!isMuted ? "primary" : "outline"}
               size="sm"
               icon={<Mic className="w-4 h-4" />}
               onClick={() => setIsMuted(!isMuted)}
             >
-              {isMuted ? 'Unmute' : 'Mute'}
+              {isMuted ? "Unmute" : "Mute"}
             </Button>
             <Button
-              variant={isScreenSharing ? 'primary' : 'outline'}
+              variant={isScreenSharing ? "primary" : "outline"}
               size="sm"
               icon={<ScreenShare className="w-4 h-4" />}
-              onClick={() => setIsScreenSharing(!isScreenSharing)}
+              onClick={toggleScreenShare}
             >
-              {isScreenSharing ? 'Stop Share' : 'Share Screen'}
+              {isScreenSharing ? "Stop Share" : "Share Screen"}
             </Button>
           </div>
           {/* invted people   */}
           <div className="flex items-center space-x-2">
             {/* Placeholder for invited people list */}
             <div className="flex items-center space-x-1 w-[25rem] p-2 overflow-x-auto rounded-full">
-             {
-                messages.map((msg)=>(
-                    <div className="group cursor-pointer relative flex  items-center ">
-                    <img
-                        key={msg.id}
-                        src={msg.avatar}
-                        alt={msg.user}
-                        className="w-8 h-8 rounded-full group-hover:scale-110 duration-300 object-cover"
-                        />
-                {msg.isLive ?  <span className="absolute bottom-0 right-0 w-3 animate-pulse-slow h-3 bg-green-500 rounded-full border-2 border-white dark:border-gray-800"></span>:
-                <span className="absolute bottom-0 right-0 w-3 h-3  bg-red-500 rounded-full border-2 border-white dark:border-gray-800"></span>}
+              {messages.map((msg) => (
+                <div className="group cursor-pointer relative flex  items-center ">
+                  <img
+                    key={msg.id}
+                    src={msg.avatar}
+                    alt={msg.user}
+                    className="w-8 h-8 rounded-full group-hover:scale-110 duration-300 object-cover"
+                  />
+                  {msg.isLive ? (
+                    <span className="absolute bottom-0 right-0 w-3 animate-pulse-slow h-3 bg-green-500 rounded-full border-2 border-white dark:border-gray-800"></span>
+                  ) : (
+                    <span className="absolute bottom-0 right-0 w-3 h-3  bg-red-500 rounded-full border-2 border-white dark:border-gray-800"></span>
+                  )}
 
-                    <div className="group-hover:block absolute top-0 w-full py-2 h-full text-center bg-black/50 text-[9px] hidden text-white p-1 rounded-full">{msg.user}</div>
-                        </div>
-                ))
-             }  
+                  <div className="group-hover:block absolute top-0 w-full py-2 h-full text-center bg-black/50 text-[9px] hidden text-white p-1 rounded-full">
+                    {msg.user}
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
           <div className="flex items-center space-x-4">
             <Button
-              variant={isRecording ? 'primary' : 'outline'}
+              variant={isRecording ? "primary" : "outline"}
               size="sm"
-              icon={isRecording ? <StopCircle className="w-4 h-4" /> : <Record className="w-4 h-4" />}
-              onClick={() => setIsRecording(!isRecording)}
-              className={isRecording ? 'animate-pulse' : ''}
+              icon={
+                isRecording ? (
+                  <StopCircle className="w-4 h-4" />
+                ) : (
+                  <Record className="w-4 h-4" />
+                )
+              }
+              onClick={isRecording ? stopRecording : startRecording}
+              className={isRecording ? "animate-pulse" : ""}
             >
-              {isRecording ? 'Stop Recording' : 'Start Recording'}
+              {isRecording ? "Stop Recording" : "Start Recording"}
             </Button>
             <Button
               variant="outline"
@@ -193,8 +401,10 @@ const LiveStream: React.FC = () => {
         <div className="relative aspect-video bg-black rounded-xl overflow-hidden">
           <video
             className="w-full h-full object-cover"
-            src="https://assets.mixkit.co/videos/preview/mixkit-software-developer-working-on-code-screen-close-up-1728-large.mp4"
+            ref={videoRef}
             autoPlay
+            muted
+            playsInline
             controls
           />
           <div className="absolute top-4 left-4 px-2 py-1 bg-red-500 text-white text-sm font-medium rounded-full flex items-center">
@@ -213,7 +423,6 @@ const LiveStream: React.FC = () => {
               </div>
             )}
           </div>
-          
         </div>
 
         {/* Stream Info */}
@@ -231,8 +440,12 @@ const LiveStream: React.FC = () => {
                     className="w-10 h-10 rounded-full object-cover"
                   />
                   <div className="ml-3">
-                    <p className="font-medium text-gray-900 dark:text-white">Alex Johnson</p>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">1.2M followers</p>
+                    <p className="font-medium text-gray-900 dark:text-white">
+                      Alex Johnson
+                    </p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      1.2M followers
+                    </p>
                   </div>
                 </div>
                 <Button variant="primary">Follow</Button>
@@ -247,18 +460,20 @@ const LiveStream: React.FC = () => {
                 Share
               </Button>
               <Button
-                variant={isLiked ? 'primary' : 'outline'}
+                variant={isLiked ? "primary" : "outline"}
                 icon={<Heart className="w-4 h-4" />}
                 onClick={() => setIsLiked(!isLiked)}
               >
-                {isLiked ? 'Liked' : 'Like'}
+                {isLiked ? "Liked" : "Like"}
               </Button>
             </div>
           </div>
-          
+
           <div className="mt-6">
             <p className="text-gray-700 dark:text-gray-300">
-              Join me as we explore the fundamentals of design systems and how to implement them effectively in your projects. We'll cover component architecture, documentation, and best practices.
+              Join me as we explore the fundamentals of design systems and how
+              to implement them effectively in your projects. We'll cover
+              component architecture, documentation, and best practices.
             </p>
             <div className="mt-4 flex flex-wrap gap-2">
               <span className="px-3 py-1 bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400 rounded-full text-sm">
@@ -280,7 +495,9 @@ const LiveStream: React.FC = () => {
         {/* Chat Header */}
         <div className="p-4 border-b border-gray-200 dark:border-gray-700">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Live Chat</h2>
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+              Live Chat
+            </h2>
             <div className="flex items-center space-x-2">
               <button className="text-gray-500 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-300">
                 <Settings className="w-5 h-5" />

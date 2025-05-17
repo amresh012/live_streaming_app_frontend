@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Tv, Mail, Lock, Eye, EyeOff } from 'lucide-react';
+import { Tv, Mail, Lock, Eye, EyeOff, Facebook } from 'lucide-react';
 import Button from '../components/Button';
 import { useDispatch } from 'react-redux';
 import { useLoginUserMutation } from '../services/authApi';
@@ -171,13 +171,9 @@ const Login: React.FC = () => {
             </button>
             <button
               type="button"
-              className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm bg-white dark:bg-gray-700 text-sm font-medium text-gray-500 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600"
+              className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm bg-white dark:bg-gray-700 text-sm font-medium text-blue-500 hover:bg-gray-50 dark:hover:bg-gray-600"
             >
-              <img
-                className="h-5 w-5"
-                src="https://www.svgrepo.com/show/448234/github.svg"
-                alt="GitHub logo"
-              />
+              <Facebook/>
             </button>
           </div>
         </div>

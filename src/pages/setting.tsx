@@ -8,9 +8,11 @@ import {
   Globe,
   Camera,
   Mic,
-  Save
+  Save,
+  ArrowLeft
 } from 'lucide-react';
 import Button from '../components/Button';
+import { Link } from 'react-router-dom';
 
 const SettingsSection: React.FC = () => {
   const [activeTab, setActiveTab] = useState('profile');
@@ -57,6 +59,13 @@ const SettingsSection: React.FC = () => {
                   <span>{tab.label}</span>
                 </button>
               ))}
+               <Link
+                            to="/dashboard"
+                            className="inline-flex items-center text-purple-600 hover:text-purple-500 dark:text-purple-400"
+                          >
+                            <ArrowLeft className="w-4 h-4 mr-2" />
+                            Back
+                          </Link>
             </nav>
           </aside>
 
